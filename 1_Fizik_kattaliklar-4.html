@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Fizik kattaliklar</title>
+<style>
+*{box-sizing:border-box}body{margin:0;font-family:Arial,sans-serif;background:linear-gradient(135deg,#e0f2fe,#fef3c7);color:#172033}
+header{padding:22px;text-align:center;background:#2563eb;color:white}h1{margin:0;font-size:30px}.sub{margin-top:7px}
+.wrap{max-width:1100px;margin:20px auto;padding:0 15px}.card{background:white;border-radius:20px;padding:22px;margin:16px 0;box-shadow:0 8px 25px #0001}
+.progress{height:14px;background:#e5e7eb;border-radius:20px;overflow:hidden}.bar{height:100%;width:0;background:#22c55e;transition:.4s}
+.objgrid,.opts{display:grid;grid-template-columns:repeat(auto-fit,minmax(145px,1fr));gap:12px}
+.obj{border:2px solid #bfdbfe;border-radius:16px;padding:18px;text-align:center;cursor:pointer;background:#eff6ff;transition:.2s;font-size:18px}.obj:hover{transform:translateY(-3px);background:#dbeafe}
+.icon{font-size:40px}.opts button,button{border:0;border-radius:12px;padding:12px 16px;background:#2563eb;color:#fff;font-size:16px;cursor:pointer}.opts button{background:#f3f4f6;color:#172033;border:2px solid #d1d5db}.opts button:hover{background:#dbeafe}
+.feedback{margin-top:15px;padding:13px;border-radius:12px;font-weight:bold;display:none}.ok{display:block;background:#dcfce7;color:#166534}.bad{display:block;background:#fee2e2;color:#991b1b}
+.challenge{background:#fff7ed;border-left:6px solid #f97316;padding:15px;border-radius:12px}.score{font-size:21px;font-weight:bold;color:#2563eb}
+.small{color:#64748b}.hidden{display:none}
+</style></head>
+<body>
+<header><h1>🔬 Fizik kattaliklar</h1><div class="sub">6–7-sinf uchun interaktiv simulyatsiya</div></header>
+<div class="wrap">
+<div class="card"><b>Jarayon:</b> obyektni tanlang → kattalikni aniqlang → birlikni tanlang → xulosa qiling.
+<div class="progress" style="margin-top:12px"><div id="bar" class="bar"></div></div>
+<p class="score">Ball: <span id="score">0</span> / 10</p></div>
+<div class="card"><h2>1-topshiriq: Obyektni tanlang</h2><p>Qaysi obyekt bilan ishlamoqchisiz?</p>
+<div class="objgrid">
+<div class="obj" onclick="pick('uzunlik','📏','Qalam uzunligi')"><div class="icon">📏</div>Qalam</div>
+<div class="obj" onclick="pick('massa','⚖️','Olma massasi')"><div class="icon">🍎</div>Olma</div>
+<div class="obj" onclick="pick('vaqt','⏱️','Yugurish vaqti')"><div class="icon">⏱️</div>Sekundomer</div>
+<div class="obj" onclick="pick('temperatura','🌡️','Suv temperaturasi')"><div class="icon">🌡️</div>Termometr</div>
+<div class="obj" onclick="pick('hajm','🧪','Suyuqlik hajmi')"><div class="icon">🧪</div>Idish</div>
+<div class="obj" onclick="pick('tezlik','🚗','Avtomobil tezligi')"><div class="icon">🚗</div>Harakat</div>
+</div></div>
+<div class="card hidden" id="quiz"><h2 id="title"></h2><p>Bu obyekt qaysi <b>fizik kattalik</b> bilan bog‘liq?</p><div class="opts" id="qopts"></div><div id="fb1" class="feedback"></div>
+<p>Endi mos <b>o‘lchov birligi</b>ni tanlang:</p><div class="opts" id="uopts"></div><div id="fb2" class="feedback"></div></div>
+<div class="card challenge"><h2>💡 O‘ylab ko‘r!</h2>
+<p>Bir xil vaqt ichida biri 20 m, ikkinchisi 40 m yo‘l bosdi. Qaysi biri tezroq harakatlangan?</p>
+<div class="opts"><button onclick="think(true)">Ikkinchisi</button><button onclick="think(false)">Birinchisi</button></div><div id="fb3" class="feedback"></div></div>
+<div class="card"><h2>📌 Xulosa</h2><p>Fizik kattalik — jism yoki hodisaning o‘lchash mumkin bo‘lgan xossasini ifodalovchi kattalik. Masalan, uzunlik, massa, vaqt, temperatura, hajm va tezlik.</p><button onclick="resetAll()">Qayta boshlash</button></div>
+</div>
+<script>
+const data={
+uzunlik:{name:"Uzunlik",units:["metr (m)","sekund (s)","kilogramm (kg)"]},
+massa:{name:"Massa",units:["kilogramm (kg)","metr (m)","kelvin (K)"]},
+vaqt:{name:"Vaqt",units:["sekund (s)","metr (m)","kilogramm (kg)"]},
+temperatura:{name:"Temperatura",units:["kelvin (K)","mol (mol)","metr (m)"]},
+hajm:{name:"Hajm",units:["kub metr (m³)","sekund (s)","amper (A)"]},
+tezlik:{name:"Tezlik",units:["metr/sekund (m/s)","kilogramm (kg)","kelvin (K)"]}
+};
+let score=0,current="",answered={};
+function pick(k,emoji,desc){current=k;document.getElementById("quiz").classList.remove("hidden");document.getElementById("title").textContent=emoji+" "+desc;
+let names=Object.values(data).map(x=>x.name);document.getElementById("qopts").innerHTML=names.map(n=>`<button onclick="checkQ('${n}')">${n}</button>`).join("");
+document.getElementById("uopts").innerHTML=data[k].units.map(u=>`<button onclick="checkU('${u}')">${u}</button>`).join("");window.scrollTo({top:document.getElementById("quiz").offsetTop-10,behavior:"smooth"})}
+function checkQ(a){let ok=a===data[current].name;feedback("fb1",ok,ok?"Barakalla! To‘g‘ri fizik kattalik.":"Qaytadan urinib ko‘ring. Obyektning nimasi o‘lchanayotganini o‘ylang.");if(ok&&!answered[current+"q"]){score++;answered[current+"q"]=1}}
+function checkU(a){let ok=a===data[current].units[0];feedback("fb2",ok,ok?"Ajoyib! Mos birlik tanlandi.":"Bu birlik boshqa kattalik uchun. Kattalik va birlikni juftlab ko‘ring.");if(ok&&!answered[current+"u"]){score++;answered[current+"u"]=1}render()}
+function think(ok){feedback("fb3",ok,ok?"To‘g‘ri! Bir xil vaqtda ko‘proq yo‘l bosgan jismning tezligi kattaroq.":"Bir xil vaqt ichida ko‘proq masofa bosilganini solishtiring.");if(ok&&!answered.t){score++;answered.t=1}render()}
+function feedback(id,ok,msg){let e=document.getElementById(id);e.className="feedback "+(ok?"ok":"bad");e.textContent=msg}
+function render(){document.getElementById("score").textContent=score;document.getElementById("bar").style.width=(score/10*100)+"%"}
+function resetAll(){score=0;answered={};document.getElementById("quiz").classList.add("hidden");["fb1","fb2","fb3"].forEach(id=>document.getElementById(id).className="feedback");render()}
+render();
+</script></body></html>
